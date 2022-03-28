@@ -7,3 +7,12 @@
     font-size: 50px; 
     text-align: end;
 }
+
+.future-forecast-card {
+    background-color: antiquewhite;
+}
+
+.img-fluid {
+    width: 75%;
+    margin-left: 15px;
+}

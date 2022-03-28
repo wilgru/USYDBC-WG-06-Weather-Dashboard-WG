@@ -12,22 +12,28 @@
 <body>
     <header>
 		<section class="header-container">
-			
+			<header class="bg-light p-2">
+				<h1 class="text-center">Weather Dashboard</h1>
+			</header>
+
 		</section>
     </header>
 	
 	<main>
-		<div class="container">
+		<div class="container mt-2">
 			<div class="row">
 				<section class="col-3" id="search-container">
-					<div class="container" id="search-city-form">
-						<div class="row justify-content-center">
-							<input type="text" class="col-9 m-3" id="search-input">
+					<form id="search-city-form">
+						<div class="container">
+							<div class="row justify-content-center">
+								<p class="text-center mt-0 mb-0">Enter city name:</p>
+								<input type="text" class="col-9" id="search-input">
+							</div>
+							<div class="row m-3 justify-content-center">
+								<button class="col-6 btn btn-primary" id="search-btn" type="submit">Search</button>
+							</div>
 						</div>
-						<div class="row justify-content-center">
-							<button class="col-3 btn btn-primary" id="search-btn">Search</button>
-						</div>
-					</div>
+					</form>
 
 					<div class="my-3" id="search-history-container">
 						<p class="my-1 text-center">Search History:</p>

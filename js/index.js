@@ -4,27 +4,28 @@ var searchFieldEl = document.getElementById("search-input");
 var weatherInfoEl = document.getElementById("weather-info-container");
 
 var historyList = [];
-var OPENWEATHER_API_KEY = ;
+var OPENWEATHER_API_KEY = "";
+// 6ff4f6cbe0c8a0dde6dff039c0ab5c6b
 
-// 
+// init function
 function init () {
     getLocalStorage()
     renderHistory()
 }
 
-// 
+// add an item to local storage
 function addNewToLocalStorage (item) {
     var itemCleaned = item;
     var newIndex = localStorage.length;
     localStorage.setItem(newIndex, itemCleaned);
 }
 
-// 
+// get everything from local storage ans sort it
 function getLocalStorage() {
     historyList = Object.values(localStorage).sort();
 }
 
-// 
+// rander all search history items to the page
 function renderHistory () {
     searchHistoryEl.innerHTML = "";
 
@@ -44,15 +45,18 @@ function renderHistory () {
     }
 }
 
-// 
+// searched city event handler
 function searchHandler (event) {
     event.preventDefault()
 
-    var searchInput = searchFieldEl.value;
+    // get the search input form the search field element
+    var rawSearchInput = searchFieldEl.value;
+    var capSearchInput = rawSearchInput.charAt(0).toUpperCase() + rawSearchInput.slice(1);
+    var searchInput = capSearchInput.trim();
 
     checkIfCity(searchInput)
         .then(data => {
-            if (data !== []) {
+            if (data) {
                 // if its new then add it to history
                 if (!historyList.includes(searchInput)) {
                     addNewToLocalStorage(searchInput);
@@ -64,6 +68,9 @@ function searchHandler (event) {
                 highlightHistoryOption(document.querySelector("[data-city='"+ searchInput +"']")) // highlight newly searched item
                 clearWeatherInfo() // clear anny current weather info
                 getWeather(searchInput) // get new weather info
+
+            } else {
+                alert("'" + searchInput + "' is not a valid city. Pleaee check your spelling and try again.")
             }
         })
         .catch(error => {
@@ -71,7 +78,7 @@ function searchHandler (event) {
         });
 }
 
-// 
+// selected city from history event handler
 function selectedFromHistoryHandler (event) {
     searchFieldEl.value = "";
     var selectedSearchFromHistoryEl = event.target
@@ -82,47 +89,58 @@ function selectedFromHistoryHandler (event) {
 
     checkIfCity(selectedCity)
         .then(data => {
-            if (data !== []) {
+            if (data) {
                 clearWeatherInfo() // remove any currwnt weather info rendered to te page
                 getWeather(selectedCity) // now render te new weather info
+            } else {
+                alert("'" + searchInput + "' is not a valid city. Pleaee check your spelling and try again.")
             }
         });
 }
 
-// 
+// check if te city parsed exists or not
 function checkIfCity(city) {
+
+    // regardless if city exists or not, this api will return something. If the city doesnt actually exist, then it will return an empty array, which can be used to check  
     return fetch("https://api.openweathermap.org/geo/1.0/direct?q=" + city + "&limit=5&appid=" + OPENWEATHER_API_KEY)
         .then(response => response.json())
         .then(data => {
-            return data
+            if (data.length !== 0) {
+                return true
+            } else {
+                return false
+            }
         })
 }
 
-// 
+// render the weather info from the parsed city and its data
 function renderWeatherInfo(city, data) {
     var todaysForecast = data.todaysForecast;
     var nextFiveDaysForecast = data.nextFiveDaysForecast;
-    console.log(nextFiveDaysForecast)
+    
+    weatherInfoEl.innerHTML = "" //reset
 
+    // loop over each forecast for the next 5 days and create elements for each
     var nextFiveDaysHTML = ""
     for (var day in nextFiveDaysForecast) {
         console.log(nextFiveDaysForecast[day])
         nextFiveDaysHTML = nextFiveDaysHTML + `
-        <div class="col-2">
-            <p>`+ moment.unix(nextFiveDaysForecast[day].dt).format("dddd, Do MMMM")+`</p>
+        <div class="col-2 future-forecast-card">
+            <p class="mb-0 mt-2">`+ moment.unix(nextFiveDaysForecast[day].dt).format("dddd, Do")+`</p>
+            <p class="m-0">`+ moment.unix(nextFiveDaysForecast[day].dt).format("MMMM")+`</p>
             <img class="img-fluid" src="http://openweathermap.org/img/wn/`+ nextFiveDaysForecast[day].weather[0].icon +`@2x.png">
-            <p>Temp: `+ nextFiveDaysForecast[day].temp.day+`</p>
-            <p>Wind: `+ nextFiveDaysForecast[day].wind_speed+`</p>
-            <p>Humidity: `+ nextFiveDaysForecast[day].humidity+`</p>
+            <p>Temp: `+ nextFiveDaysForecast[day].temp.day+` ºC</p>
+            <p>Wind: `+ nextFiveDaysForecast[day].wind_speed+` MPH</p>
+            <p class="mb-2">Humidity: `+ nextFiveDaysForecast[day].humidity+`%</p>
         </div>
         `
     }
 
-    // 
+    // create the main element for todays forecast
     var todaysWeatherEl = document.createElement("div")
     todaysWeatherEl.innerHTML = `
     <div class="container">
-        <div class="row">
+        <div class="row justify-content-between">
             <div class="col-6">
                 <h3>`+ city +`</h3>
                 <p>`+ moment.unix(todaysForecast.dt).format("dddd, Do MMMM") +`</p>  
@@ -131,16 +149,16 @@ function renderWeatherInfo(city, data) {
                 <div class="col-3 d-flex align-items-center">
                     <img class="img-fluid" src="http://openweathermap.org/img/wn/`+ todaysForecast.weather[0].icon +`@2x.png">
                 </div>
-                <div class="col-6 d-flex align-items-center">
-                    <h3 id="todays-temp">`+ todaysForecast.temp +` C</h3> 
+                <div class="col-4 d-flex align-items-center">
+                    <h3 id="todays-temp">`+ Math.floor(todaysForecast.temp) +` ºC</h3> 
                 </div>
             </div>
         </div>
         <div class="row" id="other-info">
             <p class="col-3 my-2 text-center">Wind: ` + todaysForecast.wind_speed + ` MPH</p>
-            <p class="col-3 my-2 text-center">Humidity: ` + todaysForecast.humidity + `</p>
+            <p class="col-3 my-2 text-center">Humidity: ` + todaysForecast.humidity + `%</p>
             <p class="col-3 my-2 text-center">Condition: ` + todaysForecast.weather[0].description + `</p>
-            <p class="col-3 my-2 text-center">UV Index: ` + todaysForecast.uvi + `</p>
+            <p class="col-3 my-2 text-center" id="uv-index" data-uv="`+ todaysForecast.uvi +`">UV Index: ` + todaysForecast.uvi + `</p>
         </div>
         <div class="row justify-content-between my-3" id="next-five-days-info">
         `+ nextFiveDaysHTML +`
@@ -148,21 +166,30 @@ function renderWeatherInfo(city, data) {
     </div>
     `
 
-    weatherInfoEl.append(todaysWeatherEl)
+    weatherInfoEl.append(todaysWeatherEl) //append all the forecast elements
+    styleUVIndex() // style uv index element
 }
 
-// 
+// clear any weathher info
 function clearWeatherInfo() {
-    weatherInfoEl.innerHTML = "";
+    weatherInfoEl.style.transition = "500ms";
+    weatherInfoEl.style.opacity = "0";
+
+    //wait for transition of opacity to finish
+    setTimeout(() => {
+        weatherInfoEl.innerHTML = "Loading...";
+        weatherInfoEl.style.opacity = "1";
+    }, 500)
+    
 }
 
-// 
+// highlight the parsed button element
 function highlightHistoryOption (historyOption) {
     historyOption.classList.remove("btn-secondary")
     historyOption.classList.add("btn-success")
 }
 
-// 
+// clear any styling of the history buttons
 function clearHistoryHighlighting () {
     var renderedHistoryOptions = document.querySelectorAll(".history-btn")
     for (var i = 0; i < renderedHistoryOptions.length; i++) {
@@ -171,13 +198,15 @@ function clearHistoryHighlighting () {
     }
 }
 
-// 
+// render the handler for the parsed button
 function renderButtonEventListeners(newHistoryEl) {
     newHistoryEl.addEventListener("click", selectedFromHistoryHandler);
 }
 
-// 
+// get weather from open weather API
 function getWeather (city) {
+    
+    // once the long and let is returned, then get the actual weather info using that info
     getLongLat(city)
         .then(data => {
             fetch("https://api.openweathermap.org/data/2.5/onecall?lat="+data[0]+"&lon="+data[1]+"&units=metric&appid=" + OPENWEATHER_API_KEY)
@@ -195,7 +224,29 @@ function getWeather (city) {
         })
 }
 
-// 
+// change background colour of uv index element, depending on the uv value of the element
+function styleUVIndex () {
+    var uvIndexEl = document.getElementById("uv-index");
+
+    if (uvIndexEl.dataset["uv"] < 3) {
+        uvIndexEl.style.backgroundColor = "green"
+        
+    } else if (uvIndexEl.dataset["uv"] < 6) {
+        uvIndexEl.style.backgroundColor = "yellow"
+        
+    } else if (uvIndexEl.dataset["uv"] < 8) {
+        uvIndexEl.style.backgroundColor = "orange"
+        
+    } else if (uvIndexEl.dataset["uv"] < 11) {
+        uvIndexEl.style.backgroundColor = "red"
+        
+    } else {
+        uvIndexEl.style.backgroundColor = "purple"
+    }
+    
+}
+
+// get long and lat for parsed city
 function getLongLat (city) {
     return fetch("https://api.openweathermap.org/geo/1.0/direct?q=" + city + "&limit=5&appid=" + OPENWEATHER_API_KEY)
         .then(response => response.json())
@@ -207,6 +258,7 @@ function getLongLat (city) {
         });
 }
 
-init()
+init() // begin initial function
 
+// event listeners
 searchButtonEl.addEventListener("click", searchHandler)
