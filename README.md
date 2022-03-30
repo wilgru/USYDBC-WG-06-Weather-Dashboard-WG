@@ -10,4 +10,4 @@ A weather dashboard that retrieves live weather data from openWeatherAPI. The we
 ### Website
 ---
 
-Link to deployed website: 
+Link to deployed website: https://wilgru.github.io/Weather-Dashboard-WG/
