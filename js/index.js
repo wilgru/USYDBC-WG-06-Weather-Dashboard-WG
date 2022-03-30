@@ -112,7 +112,7 @@ function renderWeatherInfo(city, data) {
                 <div class="col-3 d-flex align-items-center">
                     <img class="img-fluid" src="http://openweathermap.org/img/wn/`+ todaysForecast.weather[0].icon +`@2x.png">
                 </div>
-                <div class="col-4 d-flex align-items-center">
+                <div class="col-5 d-flex align-items-center">
                     <h3 id="todays-temp">`+ Math.floor(todaysForecast.temp) +` ºC</h3> 
                 </div>
             </div>
