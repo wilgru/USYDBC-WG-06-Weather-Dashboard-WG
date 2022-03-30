@@ -13,38 +13,6 @@ function init () {
     renderHistory()
 }
 
-// add an item to local storage
-function addNewToLocalStorage (item) {
-    var itemCleaned = item;
-    var newIndex = localStorage.length;
-    localStorage.setItem(newIndex, itemCleaned);
-}
-
-// get everything from local storage ans sort it
-function getLocalStorage() {
-    historyList = Object.values(localStorage).sort();
-}
-
-// rander all search history items to the page
-function renderHistory () {
-    searchHistoryEl.innerHTML = "";
-
-    for (var i = 0; i < historyList.length; i++) {
-        var newHistoryRowEl = document.createElement("div");
-        var newHistoryEl = document.createElement("button");
-
-        newHistoryRowEl.classList.add("row", "justify-content-center")
-        newHistoryEl.innerText = historyList[i];
-        newHistoryEl.classList.add("col-10", "btn", "history-btn", "btn-secondary", "m-1");
-        newHistoryEl.dataset.city = historyList[i]
-
-        newHistoryRowEl.appendChild(newHistoryEl);
-        searchHistoryEl.appendChild(newHistoryRowEl);
-
-        renderButtonEventListeners(newHistoryEl)
-    }
-}
-
 // searched city event handler
 function searchHandler (event) {
     event.preventDefault()
@@ -90,7 +58,7 @@ function selectedFromHistoryHandler (event) {
     checkIfCity(selectedCity)
         .then(data => {
             if (data) {
-                clearWeatherInfo() // remove any currwnt weather info rendered to te page
+                clearWeatherInfo() // remove any current weather info rendered to te page
                 getWeather(selectedCity) // now render te new weather info
             } else {
                 alert("'" + searchInput + "' is not a valid city. Pleaee check your spelling and try again.")
@@ -98,19 +66,16 @@ function selectedFromHistoryHandler (event) {
         });
 }
 
-// check if te city parsed exists or not
-function checkIfCity(city) {
+// add an item to local storage
+function addNewToLocalStorage (item) {
+    var itemCleaned = item;
+    var newIndex = localStorage.length;
+    localStorage.setItem(newIndex, itemCleaned);
+}
 
-    // regardless if city exists or not, this api will return something. If the city doesnt actually exist, then it will return an empty array, which can be used to check  
-    return fetch("https://api.openweathermap.org/geo/1.0/direct?q=" + city + "&limit=5&appid=" + OPENWEATHER_API_KEY)
-        .then(response => response.json())
-        .then(data => {
-            if (data.length !== 0) {
-                return true
-            } else {
-                return false
-            }
-        })
+// get everything from local storage ans sort it
+function getLocalStorage () {
+    historyList = Object.values(localStorage).sort();
 }
 
 // render the weather info from the parsed city and its data
@@ -123,7 +88,6 @@ function renderWeatherInfo(city, data) {
     // loop over each forecast for the next 5 days and create elements for each
     var nextFiveDaysHTML = ""
     for (var day in nextFiveDaysForecast) {
-        console.log(nextFiveDaysForecast[day])
         nextFiveDaysHTML = nextFiveDaysHTML + `
         <div class="col-2 future-forecast-card">
             <p class="mb-0 mt-2">`+ moment.unix(nextFiveDaysForecast[day].dt).format("dddd, Do")+`</p>
@@ -170,58 +134,24 @@ function renderWeatherInfo(city, data) {
     styleUVIndex() // style uv index element
 }
 
-// clear any weathher info
-function clearWeatherInfo() {
-    weatherInfoEl.style.transition = "500ms";
-    weatherInfoEl.style.opacity = "0";
+// rander all search history items to the page
+function renderHistory () {
+    searchHistoryEl.innerHTML = "";
 
-    //wait for transition of opacity to finish
-    setTimeout(() => {
-        weatherInfoEl.innerHTML = "Loading...";
-        weatherInfoEl.style.opacity = "1";
-    }, 500)
-    
-}
+    for (var i = 0; i < historyList.length; i++) {
+        var newHistoryRowEl = document.createElement("div");
+        var newHistoryEl = document.createElement("button");
 
-// highlight the parsed button element
-function highlightHistoryOption (historyOption) {
-    historyOption.classList.remove("btn-secondary")
-    historyOption.classList.add("btn-success")
-}
+        newHistoryRowEl.classList.add("row", "justify-content-center")
+        newHistoryEl.innerText = historyList[i];
+        newHistoryEl.classList.add("col-10", "btn", "history-btn", "btn-secondary", "m-1");
+        newHistoryEl.dataset.city = historyList[i]
 
-// clear any styling of the history buttons
-function clearHistoryHighlighting () {
-    var renderedHistoryOptions = document.querySelectorAll(".history-btn")
-    for (var i = 0; i < renderedHistoryOptions.length; i++) {
-        renderedHistoryOptions[i].classList.remove("btn-success");  
-        renderedHistoryOptions[i].classList.add("btn-secondary");  
+        newHistoryRowEl.appendChild(newHistoryEl);
+        searchHistoryEl.appendChild(newHistoryRowEl);
+
+        renderButtonEventListeners(newHistoryEl)
     }
-}
-
-// render the handler for the parsed button
-function renderButtonEventListeners(newHistoryEl) {
-    newHistoryEl.addEventListener("click", selectedFromHistoryHandler);
-}
-
-// get weather from open weather API
-function getWeather (city) {
-    
-    // once the long and let is returned, then get the actual weather info using that info
-    getLongLat(city)
-        .then(data => {
-            fetch("https://api.openweathermap.org/data/2.5/onecall?lat="+data[0]+"&lon="+data[1]+"&units=metric&appid=" + OPENWEATHER_API_KEY)
-                .then(response => response.json())
-                .then(data => {
-                    var forecasts = {
-                        todaysForecast: data.current,
-                        nextFiveDaysForecast: data.daily.slice(0, 5)
-                    }
-                    renderWeatherInfo(city, forecasts)
-                })
-                .catch(error => {
-                    console.error(error);
-                });
-        })
 }
 
 // change background colour of uv index element, depending on the uv value of the element
@@ -244,6 +174,75 @@ function styleUVIndex () {
         uvIndexEl.style.backgroundColor = "purple"
     }
     
+}
+
+// highlight the parsed button element
+function highlightHistoryOption (historyOption) {
+    historyOption.classList.remove("btn-secondary")
+    historyOption.classList.add("btn-success")
+}
+
+// clear any styling of the history buttons
+function clearHistoryHighlighting () {
+    var renderedHistoryOptions = document.querySelectorAll(".history-btn")
+    for (var i = 0; i < renderedHistoryOptions.length; i++) {
+        renderedHistoryOptions[i].classList.remove("btn-success");  
+        renderedHistoryOptions[i].classList.add("btn-secondary");  
+    }
+}
+
+// clear any weathher info
+function clearWeatherInfo () {
+    weatherInfoEl.style.transition = "500ms";
+    weatherInfoEl.style.opacity = "0";
+
+    //wait for transition of opacity to finish
+    setTimeout(() => {
+        weatherInfoEl.innerHTML = "Loading...";
+        weatherInfoEl.style.opacity = "1";
+    }, 500)
+    
+}
+
+// render the handler for the parsed button
+function renderButtonEventListeners (newHistoryEl) {
+    newHistoryEl.addEventListener("click", selectedFromHistoryHandler);
+}
+
+// check if te city parsed exists or not
+function checkIfCity (city) {
+
+    // regardless if city exists or not, this api will return something. If the city doesnt actually exist, then it will return an empty array, which can be used to check  
+    return fetch("https://api.openweathermap.org/geo/1.0/direct?q=" + city + "&limit=5&appid=" + OPENWEATHER_API_KEY)
+        .then(response => response.json())
+        .then(data => {
+            if (data.length !== 0) {
+                return true
+            } else {
+                return false
+            }
+        })
+}
+
+// get weather from open weather API
+function getWeather (city) {
+    
+    // once the long and let is returned, then get the actual weather info using that the long and lat
+    getLongLat(city)
+        .then(data => {
+            fetch("https://api.openweathermap.org/data/2.5/onecall?lat="+data[0]+"&lon="+data[1]+"&units=metric&appid=" + OPENWEATHER_API_KEY)
+                .then(response => response.json())
+                .then(data => {
+                    var forecasts = {
+                        todaysForecast: data.current,
+                        nextFiveDaysForecast: data.daily.slice(0, 5)
+                    }
+                    renderWeatherInfo(city, forecasts)
+                })
+                .catch(error => {
+                    console.error(error);
+                });
+        })
 }
 
 // get long and lat for parsed city
