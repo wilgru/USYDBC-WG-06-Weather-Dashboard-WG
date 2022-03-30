@@ -4,8 +4,7 @@ var searchFieldEl = document.getElementById("search-input");
 var weatherInfoEl = document.getElementById("weather-info-container");
 
 var historyList = [];
-var OPENWEATHER_API_KEY = "";
-// 6ff4f6cbe0c8a0dde6dff039c0ab5c6b
+var OPENWEATHER_API_KEY = "6ff4f6cbe0c8a0dde6dff039c0ab5c6b";
 
 // init function
 function init () {
