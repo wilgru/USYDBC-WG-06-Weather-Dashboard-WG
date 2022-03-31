@@ -10,6 +10,8 @@
 
 .future-forecast-card {
     background-color: antiquewhite;
+    border-right: 2px dotted black;
+    border-bottom: 2px dotted black;
 }
 
 .img-fluid {
