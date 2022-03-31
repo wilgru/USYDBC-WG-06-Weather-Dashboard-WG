@@ -1,5 +1,7 @@
 var searchHistoryEl = document.getElementById("search-history");
 var searchButtonEl = document.getElementById("search-btn");
+var clearHistoryButtonEl = document.getElementById("clear-history-btn");
+var searchHistoryLabel = document.getElementById("search-history-label");
 var searchFieldEl = document.getElementById("search-input");
 var weatherInfoEl = document.getElementById("weather-info-container");
 
@@ -151,6 +153,25 @@ function renderHistory () {
 
         renderButtonEventListeners(newHistoryEl)
     }
+
+    // remove or rneder the clear hhistory button
+    if (historyList.length > 0) {
+        renderClearHistoryButton()
+    } else {
+        removeClearHistoryButton()
+    }
+}
+
+// render clear history button
+function renderClearHistoryButton() {
+    clearHistoryButtonEl.style.display = "block"
+    searchHistoryLabel.style.display = "block"
+}
+
+// remove clear history button
+function removeClearHistoryButton() {
+    clearHistoryButtonEl.style.display = "none"
+    searchHistoryLabel.style.display = "none"
 }
 
 // change background colour of uv index element, depending on the uv value of the element
@@ -188,6 +209,12 @@ function clearHistoryHighlighting () {
         renderedHistoryOptions[i].classList.remove("btn-success");  
         renderedHistoryOptions[i].classList.add("btn-secondary");  
     }
+}
+
+function clearHistory() {
+    localStorage.clear()
+    getLocalStorage()
+    renderHistory()
 }
 
 // clear any weathher info
@@ -260,3 +287,4 @@ init() // begin initial function
 
 // event listeners
 searchButtonEl.addEventListener("click", searchHandler)
+clearHistoryButtonEl.addEventListener("click", clearHistory)
