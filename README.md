@@ -11,3 +11,9 @@ A weather dashboard that retrieves live weather data from openWeatherAPI. The we
 ---
 
 Link to deployed website: https://wilgru.github.io/Weather-Dashboard-WG/
+
+## License
+
+&copy; William Gruszka
+
+Licensed under the [MIT License](./LICENSE.txt).
